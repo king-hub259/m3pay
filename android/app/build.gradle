@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.sixamtech.sixcash_user"
+        applicationId "com.m3pay.tech"
         minSdkVersion 21
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
