@@ -1,21 +1,24 @@
 workflows:
-  ios_build:
-    name: Build iOS IPA
+  m3pay-ios:
+    name: Build m3pay iOS IPA (unsigned)
     max_build_duration: 60
+    instance_type: mac_mini_m2
     environment:
-      flutter: stable
-      xcode: latest
-      cocoapods: default
+      flutter: "3.27.0"
+      xcode: "16.4"
     scripts:
-      - name: Clean and update CocoaPods
+      - name: Clean CocoaPods cache and update Firebase
         script: |
           cd ios
-          rm -rf Pods Podfile.lock
+          echo "🧹 Cleaning old CocoaPods cache..."
+          rm -rf Pods Podfile.lock ~/Library/Caches/CocoaPods ~/.cocoapods
           pod cache clean --all
-          pod repo remove trunk || true
+          echo "🔁 Setting up new repo..."
           pod setup
           pod repo update
+          echo "📦 Installing pods..."
           pod install --repo-update
+          echo "🚀 Updating Firebase/Messaging..."
           pod update Firebase/Messaging
           cd ..
       - name: Build IPA (unsigned)
@@ -29,3 +32,6 @@ workflows:
       email:
         recipients:
           - your@email.com
+        notify:
+          success: true
+          failure: true
