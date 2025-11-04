@@ -10,29 +10,33 @@ workflows:
       - name: Clean CocoaPods cache and update Firebase
         script: |
           cd ios
-          echo "🧹 Cleaning old CocoaPods cache..."
+          echo "🧹 Cleaning CocoaPods cache..."
           rm -rf Pods Podfile.lock ~/Library/Caches/CocoaPods ~/.cocoapods
           pod cache clean --all
-          echo "🔁 Setting up new repo..."
           pod setup
           pod repo update
-          echo "📦 Installing pods..."
           pod install --repo-update
-          echo "🚀 Updating Firebase/Messaging..."
           pod update Firebase/Messaging
           cd ..
-      - name: Build IPA (unsigned)
+      - name: Build iOS app archive
         script: |
           flutter clean
           flutter pub get
-          flutter build ipa --release --no-codesign
-          echo "✅ IPA build complete."
-          echo "📦 Checking build output..."
-          ls -R build/ios/ipa || echo "⚠️ No IPA found in build/ios/ipa"
-          mkdir -p output
-          cp -r build/ios/ipa/*.ipa output/ || echo "⚠️ No IPA copied to output"
+          echo "🚀 Building iOS archive..."
+          flutter build ios --release --no-codesign
+      - name: Export IPA manually
+        script: |
+          echo "📦 Creating unsigned IPA from archive..."
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r m3pay.ipa Payload
+          mv m3pay.ipa ../../..
+          cd ../../..
+          echo "✅ IPA successfully exported!"
+          ls -lh m3pay.ipa
     artifacts:
-      - output/*.ipa
+      - m3pay.ipa
     publishing:
       email:
         recipients:
