@@ -1,4 +1,43 @@
-m3pay-ios:
+workflows:
+  m3pay-android:
+    name: Build m3pay Android App
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: "3.27.0"
+      xcode: "16.2"
+      groups:
+        - google_credentials  # optional, if you add Play Store keys later
+      vars:
+        PACKAGE_NAME: "com.m3pay.app"  # change this to your real package name
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter clean
+          flutter pub get
+          
+      - name: Build APK (release)
+        script: |
+          flutter build apk --release
+
+      - name: Build AppBundle (AAB) for Play Store
+        script: |
+          flutter build appbundle --release
+
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/bundle/release/app-release.aab
+      - flutter_drive.log
+
+    publishing:
+      email:
+        recipients:
+          - your@email.com   # change to your email
+        notify:
+          success: true
+          failure: true
+
+  m3pay-ios:
     name: Build m3pay iOS App (IPA)
     max_build_duration: 60
     instance_type: mac_mini_m2
@@ -13,11 +52,11 @@ m3pay-ios:
           flutter clean
           flutter pub get
 
-      - name: Build iOS IPA (for manual install)
+      - name: Build iOS app (release, no signing)
         script: |
           flutter build ios --release --no-codesign
 
-      - name: Package unsigned IPA
+      - name: Create unsigned IPA for manual install
         script: |
           cd build/ios/iphoneos
           mkdir -p Payload
