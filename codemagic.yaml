@@ -7,11 +7,13 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Install dependencies
+      - name: Install dependencies and update CocoaPods
         script: |
           cd ios
           pod repo update
-          pod install
+          pod deintegrate
+          pod install --repo-update
+          pod update Firebase/Messaging
           cd ..
       - name: Build IPA (unsigned)
         script: |
