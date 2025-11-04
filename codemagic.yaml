@@ -1,53 +1,26 @@
 workflows:
-  m3pay-android:
-    name: Build m3pay Android & iOS App
+  ios_build:
+    name: Build iOS IPA
     max_build_duration: 60
-    instance_type: mac_mini_m2
     environment:
-      flutter: "3.27.0"
-      xcode: "16.2"
-      groups:
-        - google_credentials  # optional, if you add Play Store keys later
-      vars:
-        PACKAGE_NAME: "com.m3pay.app"  # change to your real package name
-
+      flutter: stable
+      xcode: latest
+      cocoapods: default
     scripts:
-      - name: Get Flutter dependencies
-        script: |
-          flutter clean
-          flutter pub get
-
-      - name: Build Android APK (release)
-        script: |
-          flutter build apk --release
-
-      - name: Build Android AppBundle (AAB)
-        script: |
-          flutter build appbundle --release
-
-      - name: Fix CocoaPods & Build iOS (IPA)
+      - name: Install dependencies
         script: |
           cd ios
           pod repo update
           pod install
           cd ..
-          flutter build ios --release --no-codesign
-          mkdir -p build/ios/ipa
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportPath build/ios/ipa \
-            -exportOptionsPlist ios/ExportOptions.plist || true
-
+      - name: Build IPA (unsigned)
+        script: |
+          flutter clean
+          flutter pub get
+          flutter build ipa --release --no-codesign
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
-      - build/app/outputs/bundle/release/app-release.aab
       - build/ios/ipa/*.ipa
-      - flutter_drive.log
-
     publishing:
       email:
         recipients:
-          - your@email.com  # change to your email
-        notify:
-          success: true
-          failure: true
+          - your@email.com
