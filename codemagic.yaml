@@ -7,11 +7,14 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Install dependencies and update CocoaPods
+      - name: Clean and update CocoaPods
         script: |
           cd ios
+          rm -rf Pods Podfile.lock
+          pod cache clean --all
+          pod repo remove trunk || true
+          pod setup
           pod repo update
-          pod deintegrate
           pod install --repo-update
           pod update Firebase/Messaging
           cd ..
