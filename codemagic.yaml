@@ -36,3 +36,41 @@ workflows:
         notify:
           success: true
           failure: true
+
+  m3pay-ios:
+    name: Build m3pay iOS App (IPA)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: "3.27.0"
+      xcode: "16.2"
+      vars:
+        PACKAGE_NAME: "com.m3pay.app"
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter clean
+          flutter pub get
+
+      - name: Build iOS IPA (for manual install)
+        script: |
+          flutter build ios --release --no-codesign
+
+      - name: Create unsigned IPA for manual distribution
+        script: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r m3pay.ipa Payload
+
+    artifacts:
+      - build/ios/iphoneos/m3pay.ipa
+      - flutter_drive.log
+
+    publishing:
+      email:
+        recipients:
+          - your@email.com
+        notify:
+          success: true
+          failure: true
