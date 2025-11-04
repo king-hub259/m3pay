@@ -26,8 +26,13 @@ workflows:
           flutter clean
           flutter pub get
           flutter build ipa --release --no-codesign
+          echo "✅ IPA build complete."
+          echo "📦 Checking build output..."
+          ls -R build/ios/ipa || echo "⚠️ No IPA found in build/ios/ipa"
+          mkdir -p output
+          cp -r build/ios/ipa/*.ipa output/ || echo "⚠️ No IPA copied to output"
     artifacts:
-      - build/ios/ipa/*.ipa
+      - output/*.ipa
     publishing:
       email:
         recipients:
